@@ -1,0 +1,45 @@
+//Next fit
+#include <iostream>
+using namespace std;
+
+int main()
+{
+    int frag[25], b[25], f[25], nb, nf, temp, last_allocated = 0;
+    static int bf[25], nf_array[25];
+    cout << "Enter the number of blocks: ";
+    cin >> nb;
+    cout << "Enter the number of files: ";
+    cin >> nf;
+    cout << "Enter the size of the blocks:" << endl;
+    for (int i = 1; i <= nb; i++)
+    {
+        cout << "Block " << i << ": ";
+        cin >> b[i];
+    }
+    cout << "Enter the size of the files:" << endl;
+    for (int i = 1; i <= nf; i++)
+    {
+        cout << "File " << i << ": ";
+        cin >> f[i];
+    }
+    int j = 1;
+    for (int i = 1; i <= nf; i++)
+    {
+        while (j <= nb)
+        {
+            if (bf[j] != 1 && b[j] >= f[i])
+            {
+                nf_array[i] = j;
+                bf[j] = 1;
+                frag[i] = b[j] - f[i];
+                last_allocated = j;
+                break;
+            }
+            j = (j % nb) + 1;
+        }
+    }
+    cout << "\nFile_no:\tFile_size:\tBlock_no:\tBlock_size:\tFragmentation" << endl;
+    for (int i = 1; i <= nf; i++) 
+        cout << i << "\t\t" << f[i] << "\t\t" << nf_array[i] << "\t\t" << b[nf_array[i]] << "\t\t" << frag[i] << endl;
+    return 0;
+}
