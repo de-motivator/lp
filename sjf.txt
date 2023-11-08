@@ -1,74 +1,71 @@
 //SJF
 
 #include <iostream>
+
 using namespace std;
 
-void swap(int& a, int& b){
-    int temp = a;
-    a = b;
-    b = temp;
-}
+struct Process {
+    int processId;
+    int arrivalTime;
+    int burstTime;
+};
 
-int main(){
-
+int main() {
     int n;
-    float wtavg, tatavg;
-
-    cout << "\nEnter the number of processes: ";
+    cout << "Enter the number of processes: ";
     cin >> n;
 
-    int p[n], bt[n], wt[n], tat[n];
+    Process processes[n];
 
-    for (int i = 0; i < n; i++){
-        p[i] = i;
-        cout << "Enter Burst Time for Process " << i << ": ";
-        cin >> bt[i];
+    for (int i = 0; i < n; i++) {
+        processes[i].processId = i + 1;
+        cout << "Enter arrival time for Process " << processes[i].processId << ": ";
+        cin >> processes[i].arrivalTime;
+
+        cout << "Enter burst time for Process " << processes[i].processId << ": ";
+        cin >> processes[i].burstTime;
     }
 
-    for (int i = 0; i < n; i++){
-        for (int k = i + 1; k < n; k++){
-            if (bt[i] > bt[k]){
-                swap(bt[i], bt[k]);
-                swap(p[i], p[k]);
+    int currentTime = 0;
+    int completedProcesses = 0;
+    double totalWaitingTime = 0;
+    double totalTurnaroundTime = 0;
+
+    cout << "Process\tArrival Time\tBurst Time\tWaiting Time\tTurnaround Time\n";
+    while (completedProcesses < n) {
+        int shortestJobIndex = -1;
+        int shortestJobBurstTime = 10000; // A large initial value
+
+        for (int i = 0; i < n; i++) {
+            if (processes[i].arrivalTime <= currentTime && processes[i].burstTime < shortestJobBurstTime) {
+                shortestJobBurstTime = processes[i].burstTime;
+                shortestJobIndex = i;
             }
+        }
+
+        if (shortestJobIndex == -1) {
+            currentTime++;
+        } else {
+            int i = shortestJobIndex;
+            int waitingTime = currentTime - processes[i].arrivalTime;
+            int turnaroundTime = waitingTime + processes[i].burstTime;
+
+            totalWaitingTime += waitingTime;
+            totalTurnaroundTime += turnaroundTime;
+
+            cout << processes[i].processId << "\t\t" << processes[i].arrivalTime << "\t\t" << processes[i].burstTime << "\t\t" << waitingTime << "\t\t" << turnaroundTime << endl;
+
+            currentTime += processes[i].burstTime;
+            processes[i].burstTime = 10000; // Mark the process as completed
+            completedProcesses++;
         }
     }
 
-    wt[0] = wtavg = 0;
-    tat[0] = tatavg = bt[0];
-    for (int i = 1; i < n; i++){
-        wt[i] = wt[i - 1] + bt[i - 1];
-        tat[i] = tat[i - 1] + bt[i];
-        wtavg += wt[i];
-        tatavg += tat[i];
-    }
+    double averageWaitingTime = totalWaitingTime / n;
+    double averageTurnaroundTime = totalTurnaroundTime / n;
 
-    cout << "\nPROCESS \tBURST TIME \t WAITING TIME\t TURNAROUND TIME";
+    cout << "Average Waiting Time: " << averageWaitingTime << endl;
+    cout << "Average Turnaround Time: " << averageTurnaroundTime << endl;
 
-    for (int i = 0; i < n; i++) 
-	cout << "\nP" << p[i] << "\t\t" << bt[i] << "\t\t" << wt[i] << "\t\t" << tat[i];
-
-    cout << "\n\nAverage Waiting Time: " << wtavg / n << endl;
-    cout << "Average Turnaround Time: " << tatavg / n << endl << endl;
     return 0;
 }
-
-
-/*
-INPUT
-Enter the number of processes -- 4
-Enter Burst Time for Process 0 -- 6
-Enter Burst Time for Process 1 -- 8
-Enter Burst Time for Process 2 -- 7
-Enter Burst Time for Process 3 -- 3
-
-
-OUTPUT
-PROCESS BURST TIME WAITING TIME TURNAROUND TIME
-P3 3 0 3
-P0 6 3 9
-P2 7 9 16
-P1 8 16 24
-Average Waiting Time -- 7.000000
-Average Turnaround Time -- 13.000000
-*/
