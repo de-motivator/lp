@@ -2,84 +2,69 @@
 
 
 #include <iostream>
+
 using namespace std;
 
-int main(){
+struct Process {
+    int processId;
+    int arrivalTime;
+    int burstTime;
+};
 
-    int n, t, max;
-    float awt = 0, att = 0, temp = 0;
-
+int main() {
+    int n, timeQuantum;
     cout << "Enter the number of processes: ";
     cin >> n;
 
-    int  bu[n], wa[n], tat[n], ct[n];
+    cout << "Enter the time quantum: ";
+    cin >> timeQuantum;
 
-    for (int i = 0; i < n; i++){
+    Process processes[n];
 
-        cout << "Enter Burst Time for process " << i + 1 << ": ";
-        cin >> bu[i];
-        ct[i] = bu[i];
+    for (int i = 0; i < n; i++) {
+        processes[i].processId = i + 1;
+        cout << "Enter arrival time for Process " << processes[i].processId << ": ";
+        cin >> processes[i].arrivalTime;
+        cout << "Enter burst time for Process " << processes[i].processId << ": ";
+        cin >> processes[i].burstTime;
     }
 
-    cout << "Enter the size of time slice: ";
-    cin >> t;
+    int currentTime = 0;
+    int remainingProcesses = n;
+    int completedProcesses = 0;
+    int currentProcessIndex = 0;
+    int remainingBurstTime[n];
 
-    max = bu[0];
-
-    for (int i = 1; i < n; i++){
-        if (max < bu[i]){
-            max = bu[i];
-        }
+    for (int i = 0; i < n; i++) {
+        remainingBurstTime[i] = processes[i].burstTime;
     }
 
-    for (int j = 0; j < (max / t) + 1; j++){
-        for (int i = 0; i < n; i+){
-            if (bu[i] != 0) {
-                if (bu[i] <= t){
-                    tat[i] = temp + bu[i];
-                    temp = temp + bu[i];
-                    bu[i] = 0;
-                }else{
-                    bu[i] = bu[i] - t;
-                    temp = temp + t;
-                }
+    cout << "Process\tArrival Time\tBurst Time\tWaiting Time\tTurnaround Time\n";
+    while (completedProcesses < n) {
+        currentProcessIndex %= n;
+
+        if (remainingBurstTime[currentProcessIndex] > 0 && processes[currentProcessIndex].arrivalTime <= currentTime) {
+            int timeSlice = min(timeQuantum, remainingBurstTime[currentProcessIndex]);
+            remainingBurstTime[currentProcessIndex] -= timeSlice;
+
+            currentTime += timeSlice;
+
+            if (remainingBurstTime[currentProcessIndex] == 0) {
+                int waitingTime = currentTime - processes[currentProcessIndex].arrivalTime - processes[currentProcessIndex].burstTime;
+                int turnaroundTime = waitingTime + processes[currentProcessIndex].burstTime;
+
+                cout << processes[currentProcessIndex].processId << "\t\t" << processes[currentProcessIndex].arrivalTime << "\t\t" << processes[currentProcessIndex].burstTime << "\t\t" << waitingTime << "\t\t" << turnaroundTime << endl;
+
+                completedProcesses++;
             }
         }
+        currentProcessIndex++;
     }
-
-    for (int i = 0; i < n; i++){
-        wa[i] = tat[i] - ct[i];
-        att += tat[i];
-        awt += wa[i];
-    }
-
-    cout << "\nPROCESS\t BURST TIME \t WAITING TIME\tTURNAROUND TIME\n";
-
-    for (int i = 0; i < n; i++) 
-	cout <<i + 1 << "\t " << ct[i] << "\t\t " << wa[i] << "\t\t " << tat[i] << endl;
-
-    cout << "\nThe Average Turnaround time is: " << att / n << endl;
-    cout << "The Average Waiting time is: " << awt / n << endl;
 
     return 0;
 }
 
 
 
-/*
-INPUT
-Enter the no of processes – 3
-Enter Burst Time for process 1 – 24
-Enter Burst Time for process 2 -- 3
-Enter Burst Time for process 3 -- 3
-Enter the size of time slice – 3
 
 
-OUTPUT
-The Average Turnaround time is – 15.666667
-The Average Waiting time is -- 5.666667
-PROCESS BURST TIME WAITING TIME TURNAROUND TIME
-1 24 6 30
-2 3 4 7
-3 3 7 10
-*/
